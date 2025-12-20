@@ -7,8 +7,10 @@ from typing import TYPE_CHECKING, Optional
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from .component import KnowledgeGraphComponent
+from .webservcie import create_frontend_router
 
 if TYPE_CHECKING:
     from .config import KnowledgeGraphConfig
@@ -29,7 +31,15 @@ def create_app(config: Optional["KnowledgeGraphConfig"] = None) -> FastAPI:
         version="0.1.0",
         lifespan=lifespan,
     )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     app.include_router(component.router, prefix="/graph")
+    app.include_router(create_frontend_router(component))
     return app
 
 

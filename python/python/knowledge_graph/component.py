@@ -45,6 +45,14 @@ class KnowledgeGraphComponent:
                 raise HTTPException(status_code=500, detail=str(exc)) from exc
         return self._service
 
+    def get_service(self) -> LanceKnowledgeGraph:
+        """Expose the lazily-initialized knowledge graph service."""
+        return self._get_service()
+
+    def get_config(self) -> KnowledgeGraphConfig:
+        """Return the configuration used to build the component."""
+        return self._config
+
     def _setup_routes(self) -> None:
         @self.router.get("/health")
         async def health() -> Dict[str, str]:

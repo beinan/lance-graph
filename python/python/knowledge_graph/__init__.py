@@ -24,6 +24,7 @@ from .extraction import (
 from .extractors import HeuristicExtractor, LLMExtractor
 from .service import LanceKnowledgeGraph, create_default_service
 from .store import LanceGraphStore
+from .webservcie import create_frontend_router
 from .webservice import create_app
 
 TableMapping = Mapping[str, pa.Table]
@@ -123,6 +124,7 @@ __all__ = [
     "create_default_service",
     "KnowledgeGraphComponent",
     "create_app",
+    "create_frontend_router",
     "DEFAULT_STRATEGY",
     "BaseExtractor",
     "get_extractor",

@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict, Tuple, Union
 
 from .. import extraction as kg_extraction
 from .llm_utils import create_llm_client, load_llm_options, resolve_embedding_generator
@@ -35,7 +35,8 @@ def ask_question(
     llm_temperature: float,
     llm_config_path,
     embedding_model: str | None,
-) -> str:
+    return_metadata: bool = False,
+) -> Union[str, Tuple[str, Dict[str, Any]]]:
     client_options = load_llm_options(llm_config_path)
     llm_client = create_llm_client(
         llm_model=llm_model,
@@ -129,7 +130,24 @@ def ask_question(
 
     answer_prompt = build_answer_prompt(question, schema_summary, execution_results)
     raw_answer = llm_client.complete(answer_prompt)
-    return raw_answer.strip()
+    answer_text = raw_answer.strip()
+    if return_metadata:
+        metadata: Dict[str, Any] = {
+            "query_plan": query_plan,
+            "executed_queries": [
+                {
+                    "cypher": result.get("cypher"),
+                    "description": result.get("description"),
+                    "rows": result.get("rows"),
+                    "truncated": result.get("truncated"),
+                    "error": result.get("error"),
+                }
+                for result in execution_results
+                if isinstance(result, dict)
+            ],
+        }
+        return answer_text, metadata
+    return answer_text
 
 
 def extract_query_plan(payload: Any) -> list[PlanStep]:
